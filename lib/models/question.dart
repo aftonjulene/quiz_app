@@ -1,6 +1,11 @@
 class Question {
+  // question text from the api
   final String question;
+
+  // all options shown to the user
   final List<String> options;
+
+  // correct answer from the api
   final String correctAnswer;
 
   Question({
@@ -9,11 +14,15 @@ class Question {
     required this.correctAnswer,
   });
 
+  // build a Question from a single json object
   factory Question.fromJson(Map<String, dynamic> json) {
-    // Decode options by combining incorrect answers with the correct answer and shuffling them.
-    final options = List<String>.from(json['incorrect_answers'] as List);
+    final List<String> options = List<String>.from(
+      json['incorrect_answers'] as List<dynamic>,
+    );
+
     options.add(json['correct_answer'] as String);
-    options.shuffle();
+    options.shuffle(); // randomize answer order
+
     return Question(
       question: json['question'] as String,
       options: options,
