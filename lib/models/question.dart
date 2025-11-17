@@ -1,3 +1,5 @@
+import 'package:html_unescape/html_unescape.dart';
+
 class Question {
   // question text from the api
   final String question;
@@ -14,19 +16,23 @@ class Question {
     required this.correctAnswer,
   });
 
-  // build a Question from a single json object
+  // build a Question object from api json
   factory Question.fromJson(Map<String, dynamic> json) {
-    final List<String> options = List<String>.from(
-      json['incorrect_answers'] as List<dynamic>,
-    );
+    final unescape = HtmlUnescape();
 
-    options.add(json['correct_answer'] as String);
-    options.shuffle(); // randomize answer order
+    // decode question and correct answer text
+    final q = unescape.convert(json['question'] as String);
+    final correct = unescape.convert(json['correct_answer'] as String);
 
-    return Question(
-      question: json['question'] as String,
-      options: options,
-      correctAnswer: json['correct_answer'] as String,
-    );
+    // decode each incorrect answer
+    final List<String> options = (json['incorrect_answers'] as List<dynamic>)
+        .map((item) => unescape.convert(item as String))
+        .toList();
+
+    // add the correct answer and shuffle
+    options.add(correct);
+    options.shuffle();
+
+    return Question(question: q, options: options, correctAnswer: correct);
   }
 }
